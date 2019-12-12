@@ -1,0 +1,189 @@
+import java.util.HashMap; 
+import java.util.Map;
+import java.lang.*;
+
+
+  public class LRUCache {
+    int size;
+    HashMap<String, String> map;
+    DLList queue;  
+
+    private  class DLList{
+        private Node1 head;
+        private Node1 tail;
+        private int listSize;
+    
+        private class Node1{
+            String element;
+            Node1 prev;
+            Node1 next;
+        
+            public Node1 (String element, Node1 prev, Node1 next){
+                this.element=element;
+                this.next=next;
+                this.prev=prev;
+            }
+        
+        }
+        
+        public DLList (){
+            this.listSize=0;
+            this.head=null;
+            this.tail=null;
+        }
+        
+        public void printNode (){
+            Node1 temp=head;
+            while (temp != null){
+                System.out.println (temp.element);
+                temp=temp.next;
+            }
+        }
+        
+        public void addNode (String key){
+            Node1 newNode = new Node1 (key, null, head);
+            if (head==null){
+                tail = newNode;
+                }
+            else {
+                    head.prev=newNode;
+                }
+                head = newNode;
+        }
+        
+        public String popTail (){
+            Node1 del = tail;
+            if (del==null){
+                return null;
+            }
+            if (del.prev != null){
+                del.prev.next = null;
+                tail = del.prev;
+            }
+            return (del.element);
+                
+        }
+        
+        public void delNode (String key){
+            Node1 del = findNode(key);
+            if (head==null || tail==null){
+                return;
+            }
+            if (del == head){
+                head=del.next;
+                head.prev=null;
+                return;
+            }
+            else if (del == tail){
+                tail=del.prev;
+                tail.next=null;
+                return;
+            }
+            else {
+                del.prev.next = del.next;
+                del.next.prev = del.prev;
+            }
+            
+        }
+        
+        public Node1 findNode(String key){
+            Node1 temp = head;
+            while (temp != null){
+                if (temp.element.equals (key))
+                    return temp;
+                temp=temp.next;
+                
+            }
+            return null;
+        }
+        
+        public void updateHead(String key){
+            Node1 newHead = findNode(key);
+            if (newHead.prev != null){
+                newHead.prev.next=newHead.next;
+            }
+            if (newHead.next != null) {
+                newHead.next.prev=newHead.prev;
+            }
+            if (newHead!=head){
+                head.prev=newHead;
+                newHead.next=head;
+                head = newHead;
+            }
+        }
+            
+        }
+        
+
+    
+    public LRUCache (int size){
+        this.map = new HashMap<>(size); 
+        this.size = size;
+        this.queue= new DLList();
+        
+    }
+    
+    public void put (String key, String value){
+        String val;
+        if (map.get(key) == null){
+            if (size==0)
+                return;
+            if (map.size() >= size){
+                val = queue.popTail();
+                map.remove (val);
+            }
+            map.put(key, value);
+            queue.addNode(key);
+        }
+        else {
+            map.put(key, value);
+            queue.updateHead (key);
+        }
+        
+        
+        
+    }
+    public String get (String key){
+        if (map.get(key) == null){
+            return null;
+        }
+        else {
+            queue.updateHead (key);
+        }
+        return map.get(key);
+    }
+    public void del (String key){
+        if (map.get(key) == null) {
+            return;
+        }
+        else {
+            map.remove (key);
+            queue.delNode(key);
+            }
+        }
+    
+    public void reset (){
+        this.map = new HashMap<>(this.size);
+        this.queue = new DLList();
+    }
+        
+ 
+ public static void main(String a[]){
+    LRUCache lruCache=new LRUCache (6);
+    lruCache.put ("January", "1");
+    lruCache.put ("February", "2");
+    lruCache.put ("March", "3");
+    lruCache.put ("April", "4");
+    lruCache.put ("May", "5");
+    lruCache.put ("June", "6");
+    lruCache.put ("happy", "birthday");
+    System.out.println(lruCache.get ("January"));
+    System.out.println(lruCache.get ("happy"));
+    System.out.println(lruCache.get ("April"));
+    lruCache.del("happy");
+    System.out.println(lruCache.get ("happy"));
+    lruCache.reset();
+    System.out.println(lruCache.get("February"));
+ }
+    
+}
